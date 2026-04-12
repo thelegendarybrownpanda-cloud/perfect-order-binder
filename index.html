@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#070d07">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PO Binder">
+<meta name="description" content="Perfect Order — Pokémon Masterset Binder Tracker">
+<link rel="manifest" id="pwa-manifest">
+<link rel="icon" type="image/svg+xml" id="favicon-svg">
+<link rel="apple-touch-icon" id="apple-icon">
+<title>Perfect Order — Masterset Binder</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g:#3ddc32;--g2:#28a81e;--g3:#1a6612;--g4:rgba(61,220,50,.12);--g5:rgba(61,220,50,.06);
+  --bg:#070d07;--s1:#0c140c;--s2:#111a11;--s3:#162016;--card:#0f180f;
+  --b1:#1c2e1c;--b2:#253825;--b3:#304830;
+  --t1:#d8f0d0;--t2:#8aab82;--t3:#4a6a44;--t4:#2a3e28;
+  --ex:#00c8ff;--ir:#e040fb;--ur:#f8b400;--sir:#ff3d7f;--mhr:#ffd700;--rare:#aa88ff;
+  --rh-color:#7ee8ff;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--t1);font-family:'Inter',sans-serif;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 70% 50% at 85% 15%,rgba(61,220,50,.05) 0%,transparent 55%),radial-gradient(ellipse 50% 70% at 15% 85%,rgba(0,200,255,.03) 0%,transparent 55%);pointer-events:none;z-index:0}
+
+/* OFFLINE BAR */
+.offline-bar{display:none;background:rgba(255,200,0,.12);border-bottom:1px solid rgba(255,200,0,.25);padding:6px 20px;font-size:11px;color:#f0b800;text-align:center;letter-spacing:.04em}
+.offline-bar.show{display:block}
+
+/* HEADER */
+.hdr{position:sticky;top:0;z-index:200;background:rgba(7,13,7,.96);backdrop-filter:blur(16px);border-bottom:1px solid var(--b2);box-shadow:0 1px 20px rgba(0,0,0,.5)}
+.hdr-inner{display:flex;align-items:center;gap:14px;padding:0 20px;height:60px;max-width:1400px;margin:0 auto}
+.logo-wrap{display:flex;align-items:center;gap:10px}
+.zyhex{width:36px;height:36px;background:var(--s2);border:1px solid var(--b3);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 0 12px rgba(61,220,50,.2)}
+.logo-text{display:flex;flex-direction:column}
+.logo-main{font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;color:var(--g);letter-spacing:.07em;line-height:1;text-shadow:0 0 18px rgba(61,220,50,.5)}
+.logo-sub{font-size:9px;font-weight:600;letter-spacing:.18em;color:var(--t3);text-transform:uppercase;margin-top:1px}
+.hdr-right{margin-left:auto;display:flex;align-items:center;gap:16px}
+.stat-block{text-align:right}
+.stat-n{font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;color:var(--g);line-height:1}
+.stat-n small{font-size:12px;color:var(--t3);font-family:'Inter',sans-serif;font-weight:400}
+.stat-l{font-size:9px;color:var(--t3);letter-spacing:.1em;text-transform:uppercase;margin-top:1px}
+.pbar{width:110px;height:4px;background:var(--b1);border-radius:2px;overflow:hidden;margin-top:3px}
+.pfill{height:100%;background:linear-gradient(90deg,var(--g3),var(--g));border-radius:2px;transition:width .5s ease}
+.install-btn{display:none;align-items:center;gap:6px;padding:6px 12px;background:var(--g4);border:1px solid var(--g3);border-radius:8px;color:var(--g);font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;white-space:nowrap}
+.install-btn:hover{background:rgba(61,220,50,.2)}
+.install-btn.visible{display:flex}
+
+/* TABS */
+.tabs{background:var(--s1);border-bottom:1px solid var(--b1);display:flex;padding:0 20px}
+.tab{font-size:13px;font-weight:600;padding:10px 18px;color:var(--t3);cursor:pointer;border:none;background:none;font-family:'Inter',sans-serif;border-bottom:2px solid transparent;letter-spacing:.04em;transition:all .15s}
+.tab:hover{color:var(--t2)}
+.tab.on{color:var(--g);border-bottom-color:var(--g);text-shadow:0 0 8px rgba(61,220,50,.4)}
+
+/* CONTROLS */
+.ctl-wrap{background:var(--s1);border-bottom:1px solid var(--b1)}
+.ctl{display:flex;gap:8px;flex-wrap:wrap;padding:12px 20px;align-items:center;max-width:1400px;margin:0 auto;width:100%}
+.srch{position:relative;flex:1;min-width:150px;max-width:280px}
+.srch input{width:100%;background:var(--s2);border:1px solid var(--b2);border-radius:7px;padding:7px 12px 7px 32px;color:var(--t1);font-size:13px;font-family:'Inter',sans-serif;transition:border .15s}
+.srch input:focus{outline:none;border-color:var(--g3);background:var(--s3)}
+.srch input::placeholder{color:var(--t3)}
+.si{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:13px;pointer-events:none}
+select{background:var(--s2);border:1px solid var(--b2);border-radius:7px;padding:7px 10px;color:var(--t1);font-size:12px;font-family:'Inter',sans-serif;cursor:pointer}
+select:focus{outline:none;border-color:var(--g3)}
+.fg{display:flex;gap:3px}
+.fb{padding:7px 13px;background:transparent;border:1px solid var(--b2);border-radius:7px;color:var(--t3);font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .12s;letter-spacing:.04em}
+.fb:hover{color:var(--t2);border-color:var(--b3)}
+.fb.on{background:var(--g4);border-color:var(--g3);color:var(--g)}
+.vg{display:flex;gap:3px;margin-left:auto}
+.vb{width:32px;height:32px;display:flex;align-items:center;justify-content:center;border:1px solid var(--b2);border-radius:7px;background:transparent;cursor:pointer;color:var(--t3);font-size:14px;transition:all .12s}
+.vb:hover{border-color:var(--b3);color:var(--t2)}
+.vb.on{border-color:var(--g3);color:var(--g);background:var(--g5)}
+/* Price freshness indicator */
+.pfresh{font-size:10px;color:var(--t3);padding:3px 8px;border-radius:5px;background:var(--s2);border:1px solid var(--b1);white-space:nowrap}
+.pfresh.live{color:var(--g);border-color:var(--g3);background:var(--g5)}
+
+/* MAIN LAYOUT */
+.page{max-width:1400px;margin:0 auto;padding:16px 20px}
+
+/* ── CARD PAIR (Normal + RH side by side) ── */
+.cpair{display:contents}
+
+/* GRID — now uses pair-aware columns */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+.grid.lv{grid-template-columns:1fr;gap:5px}
+
+/* ── CARD TILE ── */
+.ct{border-radius:10px;background:var(--card);border:1px solid var(--b1);overflow:hidden;cursor:pointer;position:relative;transition:border-color .2s,transform .2s,box-shadow .2s;user-select:none}
+.ct:hover{border-color:var(--b3);transform:translateY(-3px);box-shadow:0 10px 28px rgba(0,0,0,.6)}
+.ct.owned{border-color:var(--g)!important;box-shadow:0 0 12px rgba(61,220,50,.2)}
+.ct.rh-owned:not(.owned){border-color:rgba(0,200,255,.35)!important;box-shadow:0 0 10px rgba(0,200,255,.12)}
+.ct.owned.rh-owned{border-color:var(--g)!important;box-shadow:0 0 12px rgba(61,220,50,.2)}
+
+/* Green tick */
+.ct.owned .tick{opacity:1}
+.tick{position:absolute;top:6px;right:6px;width:20px;height:20px;background:var(--g);border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:5;opacity:0;transition:opacity .2s;box-shadow:0 0 8px rgba(61,220,50,.4)}
+.tick svg{width:10px;height:10px;stroke:#070d07;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+
+/* Card image */
+.cimgw{width:100%;aspect-ratio:2.5/3.5;position:relative;background:var(--s2);overflow:hidden}
+.cimgw img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s,filter .3s;opacity:0}
+.cimgw img.loaded{opacity:1;animation:fadeIn .3s ease forwards}
+.ct:hover .cimgw img{transform:scale(1.04)}
+.ct.owned .cimgw img{filter:brightness(1.05) saturate(1.1)}
+/* Holo sheen */
+.sheen{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .3s;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.07) 50%,transparent 70%)}
+.ct:hover .sheen{opacity:1}
+/* ── RH ARROW BUTTON on tile ── */
+.rh-btn{position:absolute;bottom:6px;right:6px;z-index:6;width:24px;height:24px;border-radius:50%;background:rgba(0,30,45,.85);border:1px solid rgba(0,200,255,.4);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .18s;backdrop-filter:blur(4px)}
+.rh-btn:hover{background:rgba(0,200,255,.25);border-color:var(--rh-color);transform:scale(1.15)}
+.rh-btn svg{width:11px;height:11px;fill:var(--rh-color)}
+/* RH owned pip — small blue dot on top-left when RH is owned */
+.rh-pip{position:absolute;top:6px;left:6px;width:14px;height:14px;border-radius:50%;background:var(--rh-color);box-shadow:0 0 6px rgba(0,200,255,.6);z-index:5;opacity:0;transition:opacity .2s;display:flex;align-items:center;justify-content:center}
+.rh-pip svg{width:7px;height:7px;stroke:#070d07;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.ct.rh-owned .rh-pip{opacity:1}
+
+/* ── MODAL image flip ── */
+.mimg-viewer{position:relative;width:100%;overflow:hidden;border-radius:12px 12px 0 0}
+.mimg-face{width:100%;aspect-ratio:2.5/3.5;background:var(--s2);position:relative;overflow:hidden}
+.mimg-face img{width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .3s}
+.mimg-face img.loaded{opacity:1}
+/* RH overlay on modal image */
+.mimg-face.is-rh::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(125deg,transparent 0%,rgba(0,200,255,.15) 20%,rgba(180,80,255,.12) 35%,rgba(61,220,50,.1) 50%,rgba(255,180,0,.1) 65%,rgba(255,60,130,.12) 80%,transparent 100%);
+  background-size:200% 200%;animation:rhShimmer 3s ease-in-out infinite;z-index:2;pointer-events:none
+}
+/* Flip toggle bar */
+.mimg-toggle{display:flex;border-top:1px solid var(--b2)}
+.mimg-toggle-btn{flex:1;padding:8px;background:var(--s2);border:none;color:var(--t3);font-size:11px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;transition:all .15s;letter-spacing:.05em;display:flex;align-items:center;justify-content:center;gap:5px}
+.mimg-toggle-btn:first-child{border-right:1px solid var(--b2)}
+.mimg-toggle-btn.active{background:var(--s3);color:var(--t1)}
+.mimg-toggle-btn.active.rh-active{color:var(--rh-color)}
+
+/* ── OWNED CARDS section in modal ── */
+.mowned{display:flex;gap:8px;margin-bottom:16px}
+.mown-btn{flex:1;padding:10px 12px;border-radius:8px;border:1px solid var(--b2);background:transparent;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;text-align:center;color:var(--t3);display:flex;align-items:center;justify-content:center;gap:6px}
+.mown-btn:hover:not(.got){border-color:var(--b3);color:var(--t2)}
+.mown-btn.got{border-color:var(--g);color:var(--g);background:var(--g4)}
+.mown-btn.rh-own.got{border-color:var(--rh-color);color:var(--rh-color);background:rgba(0,200,255,.1)}
+.mown-chk{width:14px;height:14px;border-radius:3px;border:1.5px solid currentColor;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.mown-chk svg{width:8px;height:8px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;opacity:0;transition:opacity .1s}
+.mown-btn.got .mown-chk svg{opacity:1}
+/* Placeholder */
+.ph{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:10px}
+.ph-art{width:72%;max-width:90px;filter:brightness(.85) saturate(.9)}
+.ph-icon{font-size:32px}
+.ph-name{font-size:9px;color:var(--t3);text-align:center;font-weight:600;line-height:1.3}
+/* Rarity strip */
+.rstrip{position:absolute;bottom:0;left:0;right:0;padding:3px 5px;font-size:8px;font-weight:700;letter-spacing:.07em;text-align:center;z-index:2;backdrop-filter:blur(3px)}
+.rC{background:rgba(0,0,0,.6);color:var(--t3)}
+.rU{background:rgba(0,15,20,.65);color:#4ecdc4}
+.rR{background:rgba(20,10,40,.7);color:var(--rare)}
+.rex{background:rgba(0,15,25,.72);color:var(--ex);text-shadow:0 0 5px rgba(0,200,255,.4)}
+.rIR{background:rgba(25,5,30,.72);color:var(--ir)}
+.rUR{background:rgba(30,22,0,.72);color:var(--ur)}
+.rSIR{background:rgba(30,0,15,.78);color:var(--sir);text-shadow:0 0 4px rgba(255,61,127,.3)}
+.rMHR{background:rgba(20,16,0,.82);color:var(--mhr);text-shadow:0 0 5px rgba(255,215,0,.4)}
+/* RH badge on strip */
+.rh-badge{position:absolute;bottom:0;left:0;right:0;padding:3px 5px;font-size:8px;font-weight:700;letter-spacing:.07em;text-align:center;z-index:2;backdrop-filter:blur(3px);background:rgba(0,30,40,.75);color:var(--rh-color);text-shadow:0 0 4px rgba(0,200,255,.4)}
+
+/* Card info */
+.ci{padding:7px 9px 8px}
+.cnum{font-size:9px;color:var(--t3);font-weight:600;letter-spacing:.04em;margin-bottom:2px}
+.cname{font-size:11px;font-weight:600;color:var(--t1);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* Price on tile */
+.cpx{font-size:11px;font-weight:700;margin-top:4px;display:flex;align-items:baseline;gap:4px}
+.cpx .pv{color:#90c060}
+.cpx .pl{font-size:8px;color:var(--t3);font-weight:500}
+.cpx.rh-px .pv{color:var(--rh-color)}
+.cpx.loading .pv{color:var(--t4);animation:pulse 1.4s infinite}
+
+/* OWNED overlay flash */
+.ct::after{content:'✓';position:absolute;inset:0;background:rgba(61,220,50,.18);border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-size:32px;font-weight:700;color:var(--g);letter-spacing:.1em;opacity:0;pointer-events:none;transition:opacity .15s}
+.ct.rh-tile::after{background:rgba(0,200,255,.15);color:var(--rh-color)}
+.ct.flash::after{opacity:1}
+
+/* LOADING SHIMMER */
+.img-shimmer{position:absolute;inset:0;background:linear-gradient(90deg,var(--s2) 25%,var(--s3) 50%,var(--s2) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;z-index:1}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes rhShimmer{
+  0%{background-position:0% 0%;opacity:.7}
+  50%{background-position:100% 100%;opacity:1}
+  100%{background-position:0% 0%;opacity:.7}
+}
+@keyframes pulse{0%,100%{opacity:.3}50%{opacity:.8}}
+
+/* LIST VIEW */
+.li{border-radius:8px;background:var(--card);border:1px solid var(--b1);padding:7px 12px;cursor:pointer;display:flex;align-items:center;gap:10px;transition:border-color .15s,background .15s;user-select:none}
+.li:hover{border-color:var(--b3)}
+.li.owned{border-color:var(--g);background:rgba(61,220,50,.04)}
+.li-th{width:36px;height:50px;border-radius:4px;object-fit:cover;background:var(--s2);flex-shrink:0}
+.li-ph{width:36px;height:50px;border-radius:4px;background:var(--s2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px}
+.li-mid{flex:1;min-width:0}
+.li-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--t1)}
+.li-sub{font-size:10px;color:var(--t3);margin-top:2px}
+.li-badges{display:flex;gap:4px;margin-top:4px;flex-wrap:wrap}
+.li-vc{font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;border:1px solid transparent;cursor:pointer;transition:all .12s}
+.li-vcN{background:rgba(61,220,50,.07);color:var(--t3);border-color:var(--b2)}
+.li-vcR{background:rgba(0,200,255,.07);color:#005580;border-color:var(--b2)}
+.li-vcN.got{background:rgba(61,220,50,.2);color:var(--g);border-color:var(--g3)}
+.li-vcR.got{background:rgba(0,200,255,.18);color:var(--rh-color);border-color:#004466}
+.li-px{font-size:12px;color:#90c060;font-weight:700;flex-shrink:0;text-align:right;min-width:52px}
+.li-px small{display:block;font-size:9px;color:var(--t3);font-weight:400}
+.li-px.loading{color:var(--t4);animation:pulse 1.4s infinite}
+.li-dot{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--b2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:transparent;transition:all .15s}
+.li.owned .li-dot{background:var(--g);border-color:var(--g);color:#070d07}
+
+/* PRICES TAB */
+.psec{border:1px solid var(--b2);border-radius:10px;margin-bottom:14px;overflow:hidden}
+.phdr{background:var(--s2);padding:11px 16px;display:flex;justify-content:space-between;align-items:center}
+.phdr-t{font-family:'Rajdhani',sans-serif;font-size:17px;font-weight:700;color:var(--g);letter-spacing:.05em}
+.phdr-s{font-size:10px;color:var(--t3)}
+.prow{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-top:1px solid var(--b1);font-size:13px;gap:12px}
+.pname{color:var(--t2);flex:1;min-width:0}
+.pvals{display:flex;align-items:center;gap:12px;flex-shrink:0}
+.pmid{font-weight:700;font-size:15px;color:var(--t1)}
+.prange{font-size:10px;color:var(--t4)}
+.trend{font-size:10px;font-weight:700;padding:2px 8px;border-radius:9px;white-space:nowrap}
+.tup{background:rgba(61,220,50,.12);color:var(--g)}
+.tdn{background:rgba(255,80,80,.1);color:#ff6060}
+
+/* MODAL */
+.mbg{position:fixed;inset:0;background:rgba(0,0,0,.9);display:none;align-items:center;justify-content:center;z-index:500;padding:16px}
+.mbg.open{display:flex}
+.modal{background:var(--s1);border:1px solid var(--b2);border-radius:14px;max-width:460px;width:100%;max-height:92vh;overflow-y:auto;position:relative;box-shadow:0 0 60px rgba(0,0,0,.8),0 0 24px rgba(61,220,50,.06)}
+.mcls{position:absolute;top:10px;right:10px;background:var(--s2);border:1px solid var(--b1);border-radius:50%;width:28px;height:28px;color:var(--t2);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2;transition:all .15s}
+.mcls:hover{color:var(--t1);border-color:var(--b3)}
+/* Modal image pair */
+.mimg-pair{display:grid;grid-template-columns:1fr 1fr;gap:0;border-radius:12px 12px 0 0;overflow:hidden}
+.mimg-single{width:100%;border-radius:12px 12px 0 0;overflow:hidden}
+.mimg-slot{position:relative;aspect-ratio:2.5/3.5;background:var(--s2);overflow:hidden}
+.mimg-slot img{width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .3s}
+.mimg-slot img.loaded{opacity:1}
+.mimg-slot .img-shimmer{border-radius:0}
+.mimg-slot-label{position:absolute;bottom:0;left:0;right:0;padding:4px;font-size:9px;font-weight:700;letter-spacing:.08em;text-align:center;backdrop-filter:blur(4px);z-index:3}
+.mimg-slot-label.normal-lbl{background:rgba(0,0,0,.65);color:var(--t2)}
+.mimg-slot-label.rh-lbl{background:rgba(0,30,45,.75);color:var(--rh-color)}
+.mph{width:100%;aspect-ratio:2.5/3.5;background:var(--s2);border-radius:12px 12px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
+.mph img{width:48%;max-width:140px}
+.mph .mph-icon{font-size:48px}
+.mph span{font-size:16px;color:var(--t2);font-weight:600;font-family:'Rajdhani',sans-serif;letter-spacing:.05em}
+/* Modal body */
+.mbody{padding:16px}
+.mtitle{font-family:'Rajdhani',sans-serif;font-size:24px;font-weight:700;color:var(--g);letter-spacing:.05em;margin-bottom:2px}
+.mmeta{font-size:11px;color:var(--t3);margin-bottom:14px;letter-spacing:.03em}
+.msec{font-size:9px;font-weight:700;color:var(--t3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px}
+.vtogs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.vtog{padding:9px 16px;border-radius:8px;border:1px solid var(--b2);background:transparent;color:var(--t3);font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;flex:1;text-align:center}
+.vtog:hover:not(.got){border-color:var(--b3);color:var(--t2)}
+.vtog.got{border-color:var(--g);color:var(--g);background:var(--g4)}
+.vtog.rh-tog.got{border-color:var(--rh-color);color:var(--rh-color);background:rgba(0,200,255,.1)}
+.mpt{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:4px}
+.mpt td{padding:6px 4px;border-bottom:1px solid var(--b1);color:var(--t3)}
+.mpt td:last-child{text-align:right;color:var(--t1);font-weight:600}
+.mpt tr.rh-row td{color:var(--rh-color)}
+.mpt tr.rh-row td:first-child{color:var(--t3)}
+.mlink{display:block;margin-top:14px;padding:9px;background:var(--s2);border:1px solid var(--b2);border-radius:8px;text-align:center;color:var(--g2);font-size:12px;font-weight:600;text-decoration:none;transition:border-color .15s}
+.mlink:hover{border-color:var(--g3);color:var(--g)}
+
+/* EMPTY */
+.empty{text-align:center;padding:60px 20px;color:var(--t3);font-size:14px;grid-column:1/-1}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--s2);border:1px solid var(--b3);border-radius:10px;padding:10px 18px;font-size:13px;color:var(--t1);z-index:999;transition:transform .3s ease;white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,.5);pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+/* RESPONSIVE */
+@media(max-width:520px){
+  .grid{grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:7px}
+  .hdr-right .stat-block,.hdr-right .pbar-wrap{display:none}
+  .logo-main{font-size:18px}
+  .ctl{padding:10px 12px}
+  .page{padding:12px}
+  .pfresh{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="offline-bar" id="offline-bar">📡 Offline — showing cached data</div>
+
+<header class="hdr">
+  <div class="hdr-inner">
+    <div class="logo-wrap">
+      <div class="zyhex">⬡</div>
+      <div class="logo-text">
+        <div class="logo-main">PERFECT ORDER</div>
+        <div class="logo-sub">Masterset Binder · ME03 · 203 Cards</div>
+      </div>
+    </div>
+    <div class="hdr-right">
+      <div class="stat-block">
+        <div class="stat-n" id="sn">0 <small>/ 203</small></div>
+        <div class="stat-l">Cards Owned</div>
+      </div>
+      <div class="pbar-wrap">
+        <div style="font-size:9px;color:var(--t3);text-align:right;margin-bottom:2px" id="spct">0%</div>
+        <div class="pbar"><div class="pfill" id="pfill" style="width:0%"></div></div>
+      </div>
+      <button class="install-btn" id="install-btn" onclick="installPWA()">⬇ Install App</button>
+    </div>
+  </div>
+</header>
+
+<div class="tabs">
+  <button class="tab on" onclick="switchTab('cards',this)">Cards</button>
+  <button class="tab" onclick="switchTab('prices',this)">Live Prices</button>
+</div>
+
+<div id="tab-cards">
+  <div class="ctl-wrap">
+    <div class="ctl">
+      <div class="srch">
+        <span class="si">🔍</span>
+        <input type="text" id="search" placeholder="Search name or number…" oninput="render()">
+      </div>
+      <select id="rf" onchange="render()">
+        <option value="">All rarities</option>
+        <option value="C">Common</option>
+        <option value="U">Uncommon</option>
+        <option value="R">Rare</option>
+        <option value="ex">Double Rare (ex)</option>
+        <option value="IR">Illustration Rare</option>
+        <option value="UR">Ultra Rare</option>
+        <option value="SIR">Special Illustration Rare</option>
+        <option value="MHR">Mega Hyper Rare</option>
+      </select>
+      <div class="fg">
+        <button class="fb on" id="fa" onclick="setF('all',this)">All</button>
+        <button class="fb" id="fo" onclick="setF('owned',this)">Owned</button>
+        <button class="fb" id="fm" onclick="setF('missing',this)">Missing</button>
+      </div>
+      <span class="pfresh" id="pfresh">Prices loading…</span>
+      <div class="vg">
+        <button class="vb on" id="vg" onclick="setV('grid',this)" title="Grid">▦</button>
+        <button class="vb" id="vl" onclick="setV('list',this)" title="List">☰</button>
+      </div>
+    </div>
+  </div>
+  <div class="page">
+    <div class="grid" id="grid"></div>
+  </div>
+</div>
+
+<div id="tab-prices" style="display:none">
+  <div class="page">
+    <div class="psec">
+      <div class="phdr"><span class="phdr-t">Products</span><span class="phdr-s" id="ptime"></span></div>
+      <div id="prodrows"></div>
+    </div>
+    <div class="psec">
+      <div class="phdr"><span class="phdr-t">Chase Cards</span><span class="phdr-s">TCGPlayer market · EUR approx.</span></div>
+      <div id="cardrows"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="mbg" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <button class="mcls" onclick="closeModal()">✕</button>
+    <div id="mimg-wrap"></div>
+    <div class="mbody">
+      <div class="mtitle" id="mtitle"></div>
+      <div class="mmeta" id="mmeta"></div>
+      <div class="msec">Cards owned</div>
+      <div class="mowned" id="mowned"></div>
+      <div class="msec">Market Prices</div>
+      <table class="mpt" id="mpt-tbl"></table>
+      <a class="mlink" id="mlink" href="#" target="_blank" rel="noopener">View on TCGCollector ↗</a>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// HARDCODED BASELINE PRICES — shown instantly on load
+// ── BASELINE PRICES — scraped live from TCGCollector, April 2026 ──
+const BASE_PRICES = {
+  '001':{mid:0.07,low:0.01,high:0.25,rh:null},  '002':{mid:0.07,low:0.01,high:0.25,rh:null},
+  '003':{mid:0.08,low:0.01,high:0.30,rh:null},  '004':{mid:0.14,low:0.02,high:0.40,rh:null},
+  '005':{mid:0.09,low:0.01,high:0.30,rh:null},  '006':{mid:0.12,low:0.02,high:0.40,rh:null},
+  '007':{mid:0.09,low:0.01,high:0.25,rh:null},  '008':{mid:0.07,low:0.01,high:0.25,rh:null},
+  '009':{mid:0.10,low:0.02,high:0.35,rh:null},  '010':{mid:0.14,low:0.02,high:0.40,rh:null},
+  '011':{mid:0.14,low:0.02,high:0.40,rh:null},  '012':{mid:0.54,low:0.20,high:1.50,rh:null},
+  '013':{mid:0.10,low:0.01,high:0.30,rh:null},  '014':{mid:0.12,low:0.02,high:0.40,rh:null},
+  '015':{mid:0.09,low:0.01,high:0.25,rh:null},  '016':{mid:0.37,low:0.10,high:1.00,rh:null},
+  '017':{mid:0.08,low:0.01,high:0.25,rh:null},  '018':{mid:0.10,low:0.01,high:0.30,rh:null},
+  '019':{mid:0.12,low:0.02,high:0.40,rh:null},  '020':{mid:0.16,low:0.02,high:0.50,rh:null},
+  '021':{mid:1.23,low:0.50,high:3.00,rh:null},  '022':{mid:0.60,low:0.20,high:1.50,rh:null},
+  '023':{mid:0.15,low:0.02,high:0.50,rh:null},  '024':{mid:0.17,low:0.02,high:0.50,rh:null},
+  '025':{mid:0.07,low:0.01,high:0.25,rh:null},  '026':{mid:0.09,low:0.01,high:0.25,rh:null},
+  '027':{mid:0.07,low:0.01,high:0.25,rh:null},  '028':{mid:0.13,low:0.02,high:0.40,rh:null},
+  '029':{mid:0.10,low:0.01,high:0.30,rh:null},  '030':{mid:0.12,low:0.02,high:0.40,rh:null},
+  '031':{mid:0.66,low:0.25,high:1.80,rh:null},  '032':{mid:0.11,low:0.02,high:0.35,rh:null},
+  '033':{mid:0.11,low:0.02,high:0.35,rh:null},  '034':{mid:0.09,low:0.01,high:0.25,rh:null},
+  '035':{mid:0.11,low:0.02,high:0.35,rh:null},  '036':{mid:0.10,low:0.01,high:0.30,rh:null},
+  '037':{mid:0.07,low:0.01,high:0.25,rh:null},  '038':{mid:0.10,low:0.01,high:0.30,rh:null},
+  '039':{mid:0.10,low:0.01,high:0.30,rh:null},  '040':{mid:0.08,low:0.01,high:0.25,rh:null},
+  '041':{mid:0.12,low:0.02,high:0.40,rh:null},  '042':{mid:0.16,low:0.02,high:0.50,rh:null},
+  '043':{mid:0.16,low:0.02,high:0.50,rh:null},  '044':{mid:0.17,low:0.02,high:0.50,rh:null},
+  '045':{mid:0.18,low:0.02,high:0.55,rh:null},  '046':{mid:0.06,low:0.01,high:0.20,rh:null},
+  '047':{mid:0.85,low:0.30,high:2.00,rh:null},  '048':{mid:0.11,low:0.02,high:0.35,rh:null},
+  '049':{mid:0.12,low:0.02,high:0.40,rh:null},  '050':{mid:0.73,low:0.25,high:2.00,rh:null},
+  '051':{mid:0.07,low:0.01,high:0.25,rh:null},  '052':{mid:0.08,low:0.01,high:0.25,rh:null},
+  '053':{mid:0.40,low:0.15,high:1.20,rh:null},  '054':{mid:0.14,low:0.02,high:0.40,rh:null},
+  '055':{mid:0.51,low:0.15,high:1.50,rh:null},  '056':{mid:0.10,low:0.01,high:0.30,rh:null},
+  '057':{mid:0.11,low:0.02,high:0.35,rh:null},  '058':{mid:0.14,low:0.02,high:0.40,rh:null},
+  '059':{mid:0.08,low:0.01,high:0.25,rh:null},  '060':{mid:0.09,low:0.01,high:0.25,rh:null},
+  '061':{mid:0.10,low:0.01,high:0.30,rh:null},  '062':{mid:8.14,low:4.00,high:18.00,rh:null},
+  '063':{mid:0.17,low:0.02,high:0.50,rh:null},  '064':{mid:0.09,low:0.01,high:0.25,rh:null},
+  '065':{mid:0.09,low:0.01,high:0.25,rh:null},  '066':{mid:0.10,low:0.01,high:0.30,rh:null},
+  '067':{mid:0.06,low:0.01,high:0.20,rh:null},  '068':{mid:0.16,low:0.02,high:0.50,rh:null},
+  '069':{mid:0.18,low:0.02,high:0.55,rh:null},  '070':{mid:0.11,low:0.02,high:0.35,rh:null},
+  '071':{mid:0.15,low:0.02,high:0.45,rh:null},  '072':{mid:0.16,low:0.02,high:0.50,rh:null},
+  '073':{mid:0.09,low:0.01,high:0.25,rh:null},  '074':{mid:0.11,low:0.02,high:0.35,rh:null},
+  '075':{mid:0.10,low:0.01,high:0.30,rh:null},  '076':{mid:0.20,low:0.05,high:0.60,rh:null},
+  '077':{mid:0.10,low:0.01,high:0.30,rh:null},  '078':{mid:0.07,low:0.01,high:0.25,rh:null},
+  '079':{mid:0.10,low:0.01,high:0.30,rh:null},  '080':{mid:0.09,low:0.01,high:0.25,rh:null},
+  '081':{mid:0.77,low:0.25,high:2.00,rh:null},  '082':{mid:0.10,low:0.01,high:0.30,rh:null},
+  '083':{mid:0.11,low:0.02,high:0.35,rh:null},  '084':{mid:0.18,low:0.02,high:0.55,rh:null},
+  '085':{mid:0.18,low:0.02,high:0.55,rh:null},  '086':{mid:0.20,low:0.05,high:0.60,rh:null},
+  '087':{mid:0.25,low:0.05,high:0.75,rh:null},  '088':{mid:0.56,low:0.20,high:1.50,rh:null},
+  '089':{mid:2.79,low:1.00,high:6.00,rh:null},  '090':{mid:7.94,low:3.50,high:15.00,rh:null},
+  '091':{mid:3.84,low:1.50,high:8.00,rh:null},  '092':{mid:5.09,low:2.00,high:10.00,rh:null},
+  '093':{mid:7.53,low:3.00,high:15.00,rh:null},  '094':{mid:31.86,low:15.00,high:55.00,rh:null},
+  '095':{mid:6.22,low:2.50,high:12.00,rh:null},  '096':{mid:1.45,low:0.50,high:3.50,rh:null},
+  '097':{mid:1.77,low:0.50,high:4.00,rh:null},  '098':{mid:4.28,low:1.50,high:9.00,rh:null},
+  '099':{mid:4.53,low:1.50,high:9.00,rh:null},
+  '100':{mid:4.07,low:1.50,high:8.00,rh:null},  '101':{mid:2.12,low:0.75,high:5.00,rh:null},
+  '102':{mid:12.87,low:5.00,high:25.00,rh:null}, '103':{mid:6.73,low:2.50,high:14.00,rh:null},
+  '104':{mid:12.36,low:5.00,high:25.00,rh:null}, '105':{mid:7.12,low:2.50,high:15.00,rh:null},
+  '106':{mid:7.36,low:2.50,high:15.00,rh:null},  '107':{mid:22.04,low:10.00,high:40.00,rh:null},
+  '108':{mid:3.44,low:1.00,high:7.00,rh:null},   '109':{mid:8.70,low:3.50,high:17.00,rh:null},
+  '110':{mid:5.46,low:2.00,high:11.00,rh:null},  '111':{mid:2.94,low:1.00,high:6.00,rh:null},
+  '112':{mid:2.69,low:1.00,high:6.00,rh:null},   '113':{mid:22.86,low:10.00,high:40.00,rh:null},
+  '114':{mid:12.83,low:5.00,high:25.00,rh:null}, '115':{mid:4.06,low:1.50,high:8.00,rh:null},
+  '116':{mid:4.43,low:1.50,high:9.00,rh:null},   '117':{mid:5.33,low:2.00,high:11.00,rh:null},
+  '118':{mid:84.99,low:50.00,high:140.00,rh:null},'119':{mid:69.51,low:40.00,high:120.00,rh:null},
+  '120':{mid:104.00,low:60.00,high:175.00,rh:null},'121':{mid:172.00,low:100.00,high:280.00,rh:null},
+  '122':{mid:32.79,low:15.00,high:60.00,rh:null}, '123':{mid:84.09,low:50.00,high:140.00,rh:null},
+  '124':{mid:181.00,low:110.00,high:290.00,rh:null},
+};
+
+// ── CARD DATA ─────────────────────────────────────────────────
+const CDN = 'https://images.squarespace-cdn.com/content/682a3307f6bd950e4b98cbb9/';
+const IMG = {
+  '001':'12e408ee-c689-4e27-b5ac-3c9b70269a2c/me03-001_common.webp',
+  '002':'1937f18a-0814-4f04-85e8-56700442b652/me03-002_common.png.webp',
+  '003':'7f41af05-79b4-4485-a4ad-310803d30992/me03-003_uncommon.png.webp',
+  '004':'d43e92bf-ba72-4a0b-9be2-b2f4de8a7b1e/me03-004_common.png.webp',
+  '005':'c12f4cd1-f883-4a90-87b6-5e90c28fe41a/me03-005_common.png.webp',
+  '006':'a54e3ac3-810f-4341-bbed-1d9cf40d3cc1/me03-006_rare.png.webp',
+  '007':'f3d9b903-2e69-4bfb-a206-155099a21b4d/me03-007_common.png.webp',
+  '008':'633a238f-0ff4-4de6-9a15-04b94ba70c60/me03-008_common.png.webp',
+  '009':'03ac0c2a-447e-477d-a11e-f19ef81959e9/me03-009_uncommon.png.webp',
+  '010':'c9f03c6f-1a8a-4a7d-ae13-6b4f1b34fce5/me03-010_common.png.webp',
+  '011':'c9c6b458-fa25-4154-8213-a72819a0d2a2/me03-011_common.png.webp',
+  '012':'30d8c55c-bf42-49e4-a634-9bf43fa4b006/me03-012_double-rare.png.webp',
+  '013':'f89611b7-cedb-46fb-901d-3129997bf5c3/me03-013_common.png.webp',
+  '014':'bb02ea8d-2946-4948-8790-334411c4d69a/me03-014_uncommon.png.webp',
+  '015':'96b62be5-be69-41b6-88ad-580c04616c38/me03-015_common.png.webp',
+  '016':'83a61001-6afa-4e34-ae08-abedf173ae95/me03-016_double-rare.png.webp',
+  '017':'22cf83ed-32e5-48f6-b404-db8bed00eaad/me03-017_uncommon.png.webp',
+  '018':'e06f2b8d-3ea0-420a-8d83-ee45cb71db61/me03-018_common.png.webp',
+  '019':'b6838dbe-c655-4aa1-9bdd-6dc30e4f13ed/me03-019_rare.png.webp',
+  '020':'26190fdd-aacd-485e-8b94-49e1fc6d5015/me03-020_common.png.webp',
+  '021':'0cf0d083-0e62-4bed-90ed-95bf943c0878/me03-021_double-rare.png.webp',
+  '022':'de441aef-d06c-488a-856e-1b89d9e3e01d/me03-022_double-rare.png.webp',
+  '023':'05ce93fc-13fa-41ac-a13d-594800e62f3c/me03-023_common.png.webp',
+  '024':'180c664c-609c-435d-9d56-7e7ad79eacf3/me03-024_rare.png.webp',
+  '025':'f13b2edd-62aa-4e57-bfcf-8f8587577e4d/me03-025_uncommon.png.webp',
+  '026':'560461b0-03a4-4550-bb3f-be47d7939997/me03-026_common.png.webp',
+  '027':'2c906733-1266-410a-8e33-1acf46be8bee/me03-027_uncommon.png.webp',
+  '028':'881886cd-84a0-4d8d-9031-c1376605fbae/me03-028_rare.png.webp',
+  '029':'fa91d98b-19ad-4023-8fc6-8d0a03313225/me03-029_common.png.webp',
+  '030':'4185efa6-e1a3-4c17-be61-34724340ba80/me03-030_common.png.webp',
+  '031':'e844e706-f71f-418f-b923-b73772910f1c/me03-031_double-rare.png.webp',
+  '032':'34d1d8d5-9152-431c-bd5b-4db4a7f9d976/me03-032_common.png.webp',
+  '033':'f194cb33-5e06-4c34-8a7e-e42058f30e02/me03-033_common.png.webp',
+  '034':'3ab275ba-ffa9-450c-8a6b-f00bf671ee3a/me03-034_uncommon.png.webp',
+  '035':'18bf58be-eaa8-41e0-b28b-4f0cec19d9ad/me03-035_common.png.webp',
+  '036':'e34c43c4-fb8f-4148-ab1c-c0a93df87a63/me03-036_uncommon.png.webp',
+  '037':'9e3b38a2-0ec8-4466-a699-f1a210b1f214/me03-037_common.png.webp',
+  '038':'54205249-7d8a-474f-ad09-971371a204d1/me03-038_common.png.webp',
+  '039':'dfd0ba4b-6b11-472c-af6e-0c767a15087f/me03-039_common.png.webp',
+  '040':'e1d4a21e-59f4-4a2a-865d-9973cdbd353b/me03-040_uncommon.png.webp',
+  '041':'22222715-2242-4bcb-b9f7-af1d9e5a4ce0/me03-041_rare.png.webp',
+  '042':'fc6f316f-8c58-4a11-a21b-fccea8936a97/me03-042_common.png.webp',
+  '043':'3c39e06f-5728-4375-a430-970a0c9284d0/me03-043_uncommon.png.webp',
+  '044':'851c7ed0-cc81-489a-89ed-0457e66944a2/me03-044_common.png.webp',
+  '045':'054a1f0d-49c1-49f2-8dfe-1822033da29a/me03-045_rare.png.webp',
+  '046':'cf08b973-9045-4385-bf8d-b72450034b57/me03-046_common.png.webp',
+  '047':'5639e0c7-6a95-47a5-844d-4d49424a4a20/me03-047_double-rare.png.webp',
+  '048':'7f24ba35-8feb-451c-bc8f-46edad20a18e/me03-048_common.png.webp',
+  '049':'c9bd3a82-752e-4f15-a80b-a2a1064539fe/me03-049_common.png.webp',
+  '050':'a999f791-d48f-4664-9136-14058b12a15c/me03-050_rare.png.webp',
+  '051':'1c6af9a8-c440-4192-a034-c94618de0e96/me03-051_common.png.webp',
+  '052':'cb0d47dc-531c-4f75-8d4c-f93c7a879c4f/me03-052_uncommon.png.webp',
+  '053':'fcdf1367-1632-41e8-bf97-b81dae2ef7fe/me03-053_double-rare.png.webp',
+  '054':'f2bf35a6-b217-4cb6-a5d4-89867ee4c0b2/me03-054_rare.png.webp',
+  '055':'ec6b168d-4a90-4ccd-8e00-433d35dd8339/me03-055_double-rare.png.webp',
+  '056':'9d43aac1-5283-4997-96a7-63280a0d9117/me03-056_common.png.webp',
+  '057':'939441ec-5389-40eb-8f8e-d849f1bd84b8/me03-057_common.png.webp',
+  '058':'f6556831-4cd2-4c58-9120-5dcccfb7acbf/me03-058_uncommon.png.webp',
+  '059':'b15b3e7a-4ee0-4b5d-873d-a3d4d759262e/me03-059_common.png.webp',
+  '060':'5300b53e-c73c-4019-b9c0-f3aac5f5aa9a/me03-060_common.png.webp',
+  '061':'6eb93bba-a207-42e0-980b-ccc29c2d4bc8/me03-061_uncommon.png.webp',
+  '062':'1d78ada6-69ea-4367-8bfa-8d2983caa3b1/me03-062_double-rare.png.webp',
+  '063':'b25250da-a480-49ce-a961-346756da49c3/me03-063_common.png.webp',
+  '064':'7b8b00cc-0240-4c58-931f-a13563a410d0/me03-064_common.png.webp',
+  '065':'71cbdcb6-3b8e-4a3f-8d90-6b45a0b7bbab/me03-065_uncommon.png.webp',
+  '066':'6d7bb560-5a4d-4367-a354-78568f8c8cbd/me03-066_common.png.webp',
+  '067':'9ef74311-5395-48ac-93a0-334482bf8357/me03-067_common.png.webp',
+  '068':'dc878726-fc01-486c-9bf8-61e6e8d56017/me03-068_common.png.webp',
+  '069':'aab7202b-e129-4b5a-b0be-c4ad3db72cb7/me03-069_common.png.webp',
+  '070':'c5a5da5c-c1af-4941-b608-4b8597cbc82e/me03-070_uncommon.png.webp',
+  '071':'7111cc19-dec5-40c6-8161-bfc27f229a1c/me03-071_common.png.webp',
+  '072':'e4bf9284-7c6b-4aac-99e6-37dbf7a3cc81/me03-072_common.png.webp',
+  '073':'9fcbeffa-7cfb-4cfb-b903-7b0cefb658ab/me03-073_uncommon.png.webp',
+  '074':'61ca0a21-c99c-4d4d-bc9c-131cc6b26543/me03-074_common.png.webp',
+  '075':'862ce4ea-b2b9-43d8-b72e-5745dd6cc7a3/me03-075_uncommon.png.webp',
+  '076':'fd2e84f1-ee7f-4667-b1e5-ec16d1e6db0b/me03-076_uncommon.png.webp',
+  '077':'0f5bcd62-faac-4f78-810f-4b82d76d2c7e/me03-077_uncommon.png.webp',
+  '078':'cf9250a8-5b25-4ddf-9d7a-6e51c10a7b19/me03-078_uncommon.png.webp',
+  '079':'eadcaae7-708c-49f2-9d66-a6fe66d72c3c/me03-079_uncommon.png.webp',
+  '080':'dc4d4ea2-31fa-4c86-97ad-c6e54b310889/me03-080_common.png.webp',
+  '081':'0fdce4a7-ed2a-40e6-9ba9-43558d8f0bd4/me03-081_uncommon.png.webp',
+  '082':'1f9fc057-f914-4748-abfb-dfe029984eac/me03-082_common.png.webp',
+  '083':'5d321bfd-a71b-4591-bc5c-9fb900cc70fb/me03-083_common.png.webp',
+  '084':'8bdbf36b-6453-4ca6-b16c-cff016fffe94/me03-084_uncommon.png.webp',
+  '085':'8fd0d332-72ff-4832-953c-aa1123360601/me03-085_uncommon.png.webp',
+  '086':'ccadf7fe-bc92-4640-8ee8-dca1a9d1bf18/me03-086_rare.png.webp',
+  '087':'979bbbe0-ad11-4b73-86ff-7fdf6cb3ca6e/me03-087_rare.png.webp',
+  '088':'a7b33ff1-773a-45b1-a8e8-ba39b7c898e4/me03-088_rare.png.webp',
+  '089':'017ad469-3e65-4c98-84c2-3f01c1717f8c/me03-089.png.webp',
+  '090':'747407e4-eaf4-45ba-9927-63e3b2bd8d2a/me03-090.png.webp',
+  '091':'a9d67a7a-3f03-4e76-a96e-b3b02690de81/me03-091.png.webp',
+  '092':'4b2c5653-8ca3-46ad-a82d-84e136332416/me03-092.png.webp',
+  '093':'d8c0f2bb-a4bb-4b51-b1d7-74ee6117e463/me03-093.png.webp',
+  '094':'f07a2f53-2916-4f93-95e5-10e6a3b1de46/me03-094.png.webp',
+  '095':'0bbeee59-bb38-4732-a852-fd4fce19b4ff/me03-095.png.webp',
+  '096':'8c29b8d2-17fc-49c7-84eb-34fe8dab6108/me03-096.png.webp',
+  '097':'baba28c5-2bb4-4819-8dc8-19d9282e14e0/me03-097.png.webp',
+  '098':'969b10c3-e513-4d3d-8525-4d090753294f/me03-098.png.webp',
+  '099':'66116bf3-d48b-4aa5-ae2e-989913551899/me03-099.png.webp',
+  '100':'0511c2b7-9680-42f7-90fa-1b1259a69c0a/me03-100.png.webp',
+  '101':'a1336c64-0d7b-4727-83cb-83bd07424076/me03-101.png.webp',
+  '102':'7bc0a97a-f21a-4e7c-9db6-6449a66a67ad/me03-102.png.webp',
+  '103':'2be55951-fc6b-4b27-85e4-b9766a56d24b/me03-103.png.webp',
+  '104':'3bc65e24-d2f2-471f-a9c6-d2b5f943e587/me03-104.png.webp',
+  '105':'186371d2-0124-433e-b5f9-8bdef8d03d84/me03-105.png.webp',
+  '106':'4db5d771-391a-4989-91a5-66c3c97a181c/me03-106.png.webp',
+  '107':'b820e53c-2c10-448b-a723-15a471ca3430/me03-107.png.webp',
+  '108':'cfc0a8a2-aaa9-4a5e-bd11-9bc3ee951e61/me03-108.png.webp',
+  '109':'1aa21426-e3ed-489a-aef1-ec0ca8894d30/me03-109.png.webp',
+  '110':'6b866e41-f52e-4555-b8c8-f23d1452f3bb/me03-110.png.webp',
+  '111':'bd3435a9-3a27-4c17-a76f-7797134a81f4/me03-111.png.webp',
+  '112':'25738e28-1e72-45cc-a77f-a68b918b1a32/me03-112.png.webp',
+  '113':'8e8b4441-60af-4d1a-ba86-b30d68fcff99/me03-113.png.webp',
+  '114':'d4b8932f-6ea7-4988-bf64-e1dee3149c63/me03-114.png.webp',
+  '115':'f828b630-5364-4173-ac7f-c0b1c859f8e6/me03-115.png.webp',
+  '116':'73e266ec-3e32-4e9d-8337-5621109dba69/me03-116.png.webp',
+  '117':'8a92dd4a-a9b5-4640-83e3-603dc8ff8d72/me03-117.png.webp',
+  '118':'bee27824-d444-4ce6-9e3e-f8d7ef78b63b/me03-118.png.webp',
+  '119':'3e6b192a-8805-4957-a089-d9d840e5eb94/me03-119.png.webp',
+  '120':'4eb96f14-b446-42aa-9123-62baf91a6409/me03-120.png.webp',
+  '121':'f31580a7-ca77-49a8-8252-e7882913e5a7/me03-121.png.webp',
+  '122':'ffd38098-e32a-4f2e-a775-49a1cb49d11c/me03-122.png.webp',
+  '123':'149f99c7-b37b-4063-a48d-5245370f36e6/me03-123.png.webp',
+  '124':'7f4ef80b-4a3d-40f3-af8e-f8cec64832ca/me03-124.png.webp',
+};
+
+function cdnUrl(n) { return IMG[n] ? CDN + IMG[n] + '?format=500w' : null; }
+// CDN images (pokecottage) take priority; tcgImg fills any remaining gaps
+function imgUrl(n) { return cdnUrl(n) || tcgImg[n] || null; }
+function sprite(p) { return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${p}.png`; }
+
+const TCG_IDS = {
+  '001':58960,'002':58961,'003':58962,'004':58963,'005':58964,'006':58965,
+  '007':58966,'008':58967,'009':58968,'010':58969,'011':58970,'012':58971,
+  '013':58972,'014':58973,'015':58974,'016':58975,'017':58976,'018':58977,
+  '019':58978,'020':58979,'021':58980,'022':58981,'023':58982,'024':58983,
+  '025':58984,'026':58985,'027':58986,'028':58987,'029':58988,'030':58989,
+  '031':58990,'032':58991,'033':58992,'034':58993,'035':58994,'036':58995,
+  '037':58996,'038':58997,'039':58998,'040':58999,'041':59000,'042':59001,
+  '043':59002,'044':59003,'045':59004,'046':59005,'047':59006,'048':59007,
+  '049':59008,'050':59009,'051':59010,'052':59011,'053':59012,'054':59013,
+  '055':59014,'056':59015,'057':59016,'058':59017,'059':59018,'060':59019,
+  '061':59020,'062':59021,'063':59022,'064':59023,'065':59024,'066':59025,
+};
+
+const CARDS = [
+  {n:'001',name:'Spinarak',r:'C',t:'Grass',poke:167,rh:true},
+  {n:'002',name:'Ariados',r:'C',t:'Grass',poke:168,rh:true},
+  {n:'003',name:'Shaymin',r:'U',t:'Grass',poke:492,rh:true},
+  {n:'004',name:'Snivy',r:'C',t:'Grass',poke:495,rh:true},
+  {n:'005',name:'Servine',r:'C',t:'Grass',poke:496,rh:true},
+  {n:'006',name:'Serperior',r:'R',t:'Grass',poke:497,rh:true},
+  {n:'007',name:'Scatterbug',r:'C',t:'Grass',poke:664,rh:true},
+  {n:'008',name:'Spewpa',r:'C',t:'Grass',poke:665,rh:true},
+  {n:'009',name:'Vivillon',r:'U',t:'Grass',poke:666,rh:true},
+  {n:'010',name:'Rowlet',r:'C',t:'Grass',poke:722,rh:true},
+  {n:'011',name:'Dartrix',r:'C',t:'Grass',poke:723,rh:true},
+  {n:'012',name:'Decidueye ex',r:'ex',t:'Grass',poke:724,rh:false},
+  {n:'013',name:'Fletchinder',r:'C',t:'Fire',poke:662,rh:true},
+  {n:'014',name:'Talonflame',r:'U',t:'Fire',poke:663,rh:true},
+  {n:'015',name:'Salandit',r:'C',t:'Fire',poke:757,rh:true},
+  {n:'016',name:'Salazzle ex',r:'ex',t:'Fire',poke:758,rh:false},
+  {n:'017',name:'Turtonator',r:'U',t:'Fire',poke:776,rh:true},
+  {n:'018',name:'Seel',r:'C',t:'Water',poke:86,rh:true},
+  {n:'019',name:'Dewgong',r:'R',t:'Water',poke:87,rh:true},
+  {n:'020',name:'Staryu',r:'C',t:'Water',poke:120,rh:true},
+  {n:'021',name:'Mega Starmie ex',r:'ex',t:'Water',poke:121,rh:false},
+  {n:'022',name:'Lapras ex',r:'ex',t:'Water',poke:131,rh:false},
+  {n:'023',name:'Amaura',r:'C',t:'Water',poke:698,rh:true},
+  {n:'024',name:'Aurorus',r:'R',t:'Water',poke:699,rh:true},
+  {n:'025',name:'Volcanion',r:'U',t:'Water',poke:721,rh:true},
+  {n:'026',name:'Shinx',r:'C',t:'Lightning',poke:403,rh:true},
+  {n:'027',name:'Luxio',r:'U',t:'Lightning',poke:404,rh:true},
+  {n:'028',name:'Luxray',r:'R',t:'Lightning',poke:405,rh:true},
+  {n:'029',name:'Dedenne',r:'C',t:'Lightning',poke:702,rh:true},
+  {n:'030',name:'Clefairy',r:'C',t:'Psychic',poke:35,rh:true},
+  {n:'031',name:'Mega Clefable ex',r:'ex',t:'Psychic',poke:36,rh:false},
+  {n:'032',name:'Mawile',r:'C',t:'Psychic',poke:303,rh:true},
+  {n:'033',name:'Espurr',r:'C',t:'Psychic',poke:677,rh:true},
+  {n:'034',name:'Meowstic',r:'U',t:'Psychic',poke:678,rh:true},
+  {n:'035',name:'Spritzee',r:'C',t:'Psychic',poke:682,rh:true},
+  {n:'036',name:'Aromatisse',r:'U',t:'Psychic',poke:683,rh:true},
+  {n:'037',name:'Nosepass',r:'C',t:'Fighting',poke:299,rh:true},
+  {n:'038',name:'Probopass',r:'C',t:'Fighting',poke:476,rh:true},
+  {n:'039',name:'Hippopotas',r:'C',t:'Fighting',poke:449,rh:true},
+  {n:'040',name:'Hippowdon',r:'U',t:'Fighting',poke:450,rh:true},
+  {n:'041',name:'Landorus',r:'R',t:'Fighting',poke:645,rh:true},
+  {n:'042',name:'Binacle',r:'C',t:'Fighting',poke:688,rh:true},
+  {n:'043',name:'Barbaracle',r:'U',t:'Fighting',poke:689,rh:true},
+  {n:'044',name:'Tyrunt',r:'C',t:'Fighting',poke:696,rh:true},
+  {n:'045',name:'Tyrantrum',r:'R',t:'Fighting',poke:697,rh:true},
+  {n:'046',name:'Hawlucha',r:'C',t:'Fighting',poke:701,rh:true},
+  {n:'047',name:'Mega Zygarde ex',r:'ex',t:'Dragon',poke:718,rh:false},
+  {n:'048',name:'Gastly',r:'C',t:'Darkness',poke:92,rh:true},
+  {n:'049',name:'Haunter',r:'C',t:'Darkness',poke:93,rh:true},
+  {n:'050',name:'Gengar',r:'R',t:'Darkness',poke:94,rh:true},
+  {n:'051',name:'Skorupi',r:'C',t:'Darkness',poke:451,rh:true},
+  {n:'052',name:'Drapion',r:'U',t:'Darkness',poke:452,rh:true},
+  {n:'053',name:'Yveltal ex',r:'ex',t:'Darkness',poke:717,rh:false},
+  {n:'054',name:'Chien-Pao',r:'R',t:'Darkness',poke:1002,rh:true},
+  {n:'055',name:'Mega Skarmory ex',r:'ex',t:'Metal',poke:227,rh:false},
+  {n:'056',name:'Honedge',r:'C',t:'Metal',poke:679,rh:true},
+  {n:'057',name:'Doublade',r:'C',t:'Metal',poke:680,rh:true},
+  {n:'058',name:'Aegislash',r:'U',t:'Metal',poke:681,rh:true},
+  {n:'059',name:'Klefki',r:'C',t:'Metal',poke:707,rh:true},
+  {n:'060',name:'Rattata',r:'C',t:'Colorless',poke:19,rh:true},
+  {n:'061',name:'Raticate',r:'U',t:'Colorless',poke:20,rh:true},
+  {n:'062',name:'Meowth ex',r:'ex',t:'Colorless',poke:52,rh:false},
+  {n:'063',name:'Snorlax',r:'C',t:'Colorless',poke:143,rh:true},
+  {n:'064',name:'Bunnelby',r:'C',t:'Colorless',poke:659,rh:true},
+  {n:'065',name:'Diggersby',r:'U',t:'Colorless',poke:660,rh:true},
+  {n:'066',name:'Fletchling',r:'C',t:'Colorless',poke:661,rh:true},
+  {n:'067',name:'Furfrou',r:'C',t:'Colorless',poke:676,rh:true},
+  {n:'068',name:'Antique Jaw Fossil',r:'C',t:'Item',poke:null,rh:true},
+  {n:'069',name:'Antique Sail Fossil',r:'C',t:'Item',poke:null,rh:true},
+  {n:'070',name:'Core Memory',r:'U',t:'Item',poke:null,rh:true},
+  {n:'071',name:'Crushing Hammer',r:'C',t:'Item',poke:null,rh:true},
+  {n:'072',name:'Energy Search',r:'C',t:'Item',poke:null,rh:true},
+  {n:'073',name:'Energy Swatter',r:'U',t:'Item',poke:null,rh:true},
+  {n:'074',name:'Hole-Digging Shovel',r:'C',t:'Item',poke:null,rh:true},
+  {n:'075',name:'Jacinthe',r:'U',t:'Supporter',poke:null,rh:true},
+  {n:'076',name:'Judge',r:'U',t:'Supporter',poke:null,rh:true},
+  {n:'077',name:'Lumiose City',r:'U',t:'Stadium',poke:null,rh:true},
+  {n:'078',name:'Lumiose Galette',r:'U',t:'Item',poke:null,rh:true},
+  {n:'079',name:'Naveen',r:'U',t:'Supporter',poke:null,rh:true},
+  {n:'080',name:'Poké Ball',r:'C',t:'Item',poke:null,rh:true},
+  {n:'081',name:'Poké Pad',r:'U',t:'Item',poke:null,rh:true},
+  {n:'082',name:'Pokémon Catcher',r:'C',t:'Item',poke:null,rh:true},
+  {n:'083',name:'Potion',r:'C',t:'Item',poke:null,rh:true},
+  {n:'084',name:"Rosa's Encouragement",r:'U',t:'Supporter',poke:null,rh:true},
+  {n:'085',name:'Tarragon',r:'U',t:'Supporter',poke:null,rh:true},
+  {n:'086',name:'Growing Grass Energy',r:'R',t:'Energy',poke:null,rh:true},
+  {n:'087',name:'Rocky Fighting Energy',r:'R',t:'Energy',poke:null,rh:true},
+  {n:'088',name:'Telepathic Psychic Energy',r:'R',t:'Energy',poke:null,rh:true},
+  {n:'089',name:'Spewpa',r:'IR',t:'Grass',poke:665,rh:false},
+  {n:'090',name:'Rowlet',r:'IR',t:'Grass',poke:722,rh:false},
+  {n:'091',name:'Talonflame',r:'IR',t:'Fire',poke:663,rh:false},
+  {n:'092',name:'Aurorus',r:'IR',t:'Water',poke:699,rh:false},
+  {n:'093',name:'Dedenne',r:'IR',t:'Lightning',poke:702,rh:false},
+  {n:'094',name:'Clefairy',r:'IR',t:'Psychic',poke:35,rh:false},
+  {n:'095',name:'Espurr',r:'IR',t:'Psychic',poke:677,rh:false},
+  {n:'096',name:'Probopass',r:'IR',t:'Fighting',poke:476,rh:false},
+  {n:'097',name:'Drapion',r:'IR',t:'Darkness',poke:452,rh:false},
+  {n:'098',name:'Doublade',r:'IR',t:'Metal',poke:680,rh:false},
+  {n:'099',name:'Raticate',r:'IR',t:'Colorless',poke:20,rh:false},
+  {n:'100',name:'Decidueye ex',r:'UR',t:'Grass',poke:724,rh:false},
+  {n:'101',name:'Salazzle ex',r:'UR',t:'Fire',poke:758,rh:false},
+  {n:'102',name:'Mega Starmie ex',r:'UR',t:'Water',poke:121,rh:false},
+  {n:'103',name:'Mega Clefable ex',r:'UR',t:'Psychic',poke:36,rh:false},
+  {n:'104',name:'Mega Zygarde ex',r:'UR',t:'Dragon',poke:718,rh:false},
+  {n:'105',name:'Yveltal ex',r:'UR',t:'Darkness',poke:717,rh:false},
+  {n:'106',name:'Mega Skarmory ex',r:'UR',t:'Metal',poke:227,rh:false},
+  {n:'107',name:'Meowth ex',r:'UR',t:'Colorless',poke:52,rh:false},
+  {n:'108',name:'Energy Recycler',r:'UR',t:'Item',poke:null,rh:false},
+  {n:'109',name:'Forest of Vitality',r:'UR',t:'Stadium',poke:null,rh:false},
+  {n:'110',name:'Jacinthe',r:'UR',t:'Supporter',poke:null,rh:false},
+  {n:'111',name:'Lumiose City',r:'UR',t:'Stadium',poke:null,rh:false},
+  {n:'112',name:'Naveen',r:'UR',t:'Supporter',poke:null,rh:false},
+  {n:'113',name:'Poké Pad',r:'UR',t:'Item',poke:null,rh:false},
+  {n:'114',name:"Rosa's Encouragement",r:'UR',t:'Supporter',poke:null,rh:false},
+  {n:'115',name:'Sacred Ash',r:'UR',t:'Item',poke:null,rh:false},
+  {n:'116',name:'Tarragon',r:'UR',t:'Supporter',poke:null,rh:false},
+  {n:'117',name:'Wondrous Patch',r:'UR',t:'Item',poke:null,rh:false},
+  {n:'118',name:'Mega Starmie ex',r:'SIR',t:'Water',poke:121,rh:false},
+  {n:'119',name:'Mega Clefable ex',r:'SIR',t:'Psychic',poke:36,rh:false},
+  {n:'120',name:'Mega Zygarde ex',r:'SIR',t:'Dragon',poke:718,rh:false},
+  {n:'121',name:'Meowth ex',r:'SIR',t:'Colorless',poke:52,rh:false},
+  {n:'122',name:'Jacinthe',r:'SIR',t:'Supporter',poke:null,rh:false},
+  {n:'123',name:"Rosa's Encouragement",r:'SIR',t:'Supporter',poke:null,rh:false},
+  {n:'124',name:'Mega Zygarde ex',r:'MHR',t:'Dragon',poke:718,rh:false},
+];
+
+const R_LABEL = {C:'Common',U:'Uncommon',R:'Rare',ex:'Double Rare',IR:'Illus. Rare',UR:'Ultra Rare',SIR:'Special IR',MHR:'Mega Hyper Rare'};
+const TYPE_E = {Grass:'🌿',Fire:'🔥',Water:'💧',Lightning:'⚡',Psychic:'🔮',Fighting:'👊',Darkness:'🌑',Metal:'⚙️',Dragon:'🐉',Colorless:'⭐',Item:'📦',Supporter:'🧑',Stadium:'🏙️',Energy:'✨'};
+
+// ── STATE ─────────────────────────────────────────────────────
+let owned = {}, tcgP = {}, tcgImg = {}, oF = 'all', vM = 'grid', cur = null;
+try { owned = JSON.parse(localStorage.getItem('por4_owned') || '{}'); } catch(e) {}
+function save() { try { localStorage.setItem('por4_owned', JSON.stringify(owned)); } catch(e) {} }
+
+// Pre-load baseline prices so grid shows immediately
+Object.assign(tcgP, BASE_PRICES);
+
+function vts(c) { return c.rh ? ['Normal','Reverse Holo'] : ['Normal']; }
+function hasAny(c) { return vts(c).some(v => owned[c.n+':'+v]); }
+function hasAll(c) { return vts(c).every(v => owned[c.n+':'+v]); }
+
+// ── STATS ─────────────────────────────────────────────────────
+function updateStats() {
+  let tot = 0, got = 0;
+  CARDS.forEach(c => { const v = vts(c); tot += v.length; v.forEach(x => { if (owned[c.n+':'+x]) got++; }); });
+  const pct = tot ? Math.round(got/tot*100) : 0;
+  document.getElementById('sn').innerHTML = `${got} <small>/ ${tot}</small>`;
+  document.getElementById('spct').textContent = pct + '%';
+  document.getElementById('pfill').style.width = pct + '%';
+}
+
+// ── RENDER ────────────────────────────────────────────────────
+function render() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const rf = document.getElementById('rf').value;
+  const grid = document.getElementById('grid');
+  const cards = CARDS.filter(c => {
+    if (q && !c.name.toLowerCase().includes(q) && !c.n.includes(q)) return false;
+    if (rf && c.r !== rf) return false;
+    if (oF === 'owned' && !hasAny(c)) return false;
+    if (oF === 'missing' && hasAll(c)) return false;
+    return true;
+  });
+  updateStats();
+  if (!cards.length) { grid.innerHTML = '<div class="empty">No cards found</div>'; return; }
+
+  if (vM === 'list') {
+    grid.className = 'grid lv';
+    grid.innerHTML = cards.map(c => {
+      const img = imgUrl(c.n) || (c.poke ? sprite(c.poke) : null);
+      const p = tcgP[c.n];
+      const normOwned = !!owned[c.n+':Normal'];
+      const rhOwned = c.rh && !!owned[c.n+':Reverse Holo'];
+      const priceStr = p?.mid != null ? `€${p.mid.toFixed(2)}` : '—';
+      const ownedClass = (normOwned || rhOwned) ? ' owned' : '';
+      return `<div class="li${ownedClass}" onclick="openModal('${c.n}')">
+        ${img ? `<img class="li-th" src="${img}" alt="" loading="lazy" onerror="this.style.opacity=0">` : `<div class="li-ph">${TYPE_E[c.t]||'🃏'}</div>`}
+        <div class="li-mid">
+          <div class="li-name">${c.name}</div>
+          <div class="li-sub">#${c.n} · ${R_LABEL[c.r]}</div>
+          <div class="li-badges">
+            <span class="li-vc li-vcN${normOwned?' got':''}" onclick="event.stopPropagation();toggleV('${c.n}','Normal');render()">Normal</span>
+            ${c.rh ? `<span class="li-vc li-vcR${rhOwned?' got':''}" onclick="event.stopPropagation();toggleV('${c.n}','Reverse Holo');render()">🌟 RH</span>` : ''}
+          </div>
+        </div>
+        <div class="li-px"><span>${priceStr}</span><small>market</small></div>
+        <div class="li-dot">✓</div>
+      </div>`;
+    }).join('');
+    return;
+  }
+
+  // GRID VIEW — one tile per card, RH arrow button on cards that have RH
+  grid.className = 'grid';
+  grid.innerHTML = cards.map(c => {
+    const img = imgUrl(c.n);
+    const sp = c.poke ? sprite(c.poke) : null;
+    const p = tcgP[c.n];
+    const normOwned = !!owned[c.n+':Normal'];
+    const rhOwned = c.rh && !!owned[c.n+':Reverse Holo'];
+    const normPrice = p?.mid != null ? `<div class="cpx"><span class="pv">€${p.mid.toFixed(2)}</span><span class="pl">market</span></div>` : `<div class="cpx"><span class="pv">—</span></div>`;
+
+    // Border: full green if both owned, green if normal owned, blue glow if only RH owned
+    let tileClass = 'ct';
+    if (normOwned && rhOwned) tileClass += ' owned rh-owned';
+    else if (normOwned) tileClass += ' owned';
+    else if (rhOwned) tileClass += ' rh-owned';
+
+    // RH arrow button (only for cards with RH variant)
+    const rhBtn = c.rh ? `
+      <div class="rh-pip"><svg viewBox="0 0 12 9"><polyline points="1,5 4,8 11,1"/></svg></div>
+      <button class="rh-btn" onclick="event.stopPropagation();openModal('${c.n}',true)" title="View Reverse Holo">
+        <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M8 1l5 7H3l5-7z" opacity=".5"/><circle cx="8" cy="11.5" r="2.5"/><path d="M5.5 14.5q2.5-2 5 0" stroke-width="1.2" stroke="currentColor" fill="none" stroke-linecap="round"/></svg>
+      </button>` : '';
+
+    return `<div class="${tileClass}" onclick="quickToggle(event,'${c.n}','Normal')" oncontextmenu="event.preventDefault();openModal('${c.n}')">
+      <div class="tick"><svg viewBox="0 0 12 9"><polyline points="1,5 4,8 11,1"/></svg></div>
+      ${rhBtn}
+      <div class="cimgw">
+        ${img ? `<div class="img-shimmer"></div><img src="${img}" alt="${c.name}" loading="lazy" onload="this.previousSibling.style.display='none';this.classList.add('loaded')" onerror="this.previousSibling.style.display='none';this.style.display='none';this.nextSibling.style.display='flex'">` : ''}
+        <div class="ph" style="${img?'display:none':''}">
+          ${sp ? `<img class="ph-art" src="${sp}" alt="" loading="lazy" onerror="this.style.display='none'">` : `<span class="ph-icon">${TYPE_E[c.t]||'🃏'}</span>`}
+          <span class="ph-name">${c.name}</span>
+        </div>
+        <div class="sheen"></div>
+        <div class="rstrip r${c.r}">${R_LABEL[c.r]}</div>
+      </div>
+      <div class="ci">
+        <div class="cnum">#${c.n} · ${c.t}</div>
+        <div class="cname">${c.name}</div>
+        ${normPrice}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// Quick-toggle Normal on single tap
+function quickToggle(e, n, variant) {
+  const k = n + ':' + variant;
+  owned[k] = !owned[k];
+  if (!owned[k]) delete owned[k];
+  save();
+  const el = e.currentTarget;
+  el.classList.add('flash');
+  setTimeout(() => el.classList.remove('flash'), 350);
+  // Update classes live without full re-render
+  const normOwned = !!owned[n+':Normal'];
+  const card = CARDS.find(c => c.n === n);
+  const rhOwned = card?.rh && !!owned[n+':Reverse Holo'];
+  el.classList.toggle('owned', normOwned);
+  el.classList.toggle('rh-owned', rhOwned);
+  updateStats();
+}
+
+// ── TOGGLE (from modal) ────────────────────────────────────────
+function toggleV(n, v) {
+  const k = n + ':' + v;
+  owned[k] = !owned[k];
+  if (!owned[k]) delete owned[k];
+  save();
+  if (cur?.n === n) renderMOwned(cur);
+  render();
+}
+
+// ── MODAL ─────────────────────────────────────────────────────
+let modalRhView = false; // which face is shown
+
+function renderMOwned(c) {
+  const el = document.getElementById('mowned');
+  const normOwned = !!owned[c.n+':Normal'];
+  const chk = `<div class="mown-chk"><svg viewBox="0 0 12 9"><polyline points="1,5 4,8 11,1"/></svg></div>`;
+  let html = `<button class="mown-btn${normOwned?' got':''}" onclick="toggleV('${c.n}','Normal')">${chk} Normal</button>`;
+  if (c.rh) {
+    const rhOwned = !!owned[c.n+':Reverse Holo'];
+    html += `<button class="mown-btn rh-own${rhOwned?' got':''}" onclick="toggleV('${c.n}','Reverse Holo')">${chk} 🌟 Reverse Holo</button>`;
+  }
+  el.innerHTML = html;
+}
+
+function setModalFace(isRH) {
+  modalRhView = isRH;
+  const face = document.getElementById('mimg-face');
+  if (!face) return;
+  face.classList.toggle('is-rh', isRH);
+  document.querySelectorAll('.mimg-toggle-btn').forEach((b, i) => {
+    b.classList.toggle('active', i === (isRH ? 1 : 0));
+    if (i === 1) b.classList.toggle('rh-active', isRH);
+  });
+}
+
+function openModal(n, showRH = false) {
+  const c = CARDS.find(x => x.n === n);
+  if (!c) return;
+  cur = c;
+  modalRhView = showRH && c.rh;
+  const img = imgUrl(c.n);
+  const sp = c.poke ? sprite(c.poke) : null;
+  const w = document.getElementById('mimg-wrap');
+
+  // Build image viewer
+  const imgSrc = img || sp;
+  const imgTag = imgSrc
+    ? `<div class="img-shimmer"></div><img src="${imgSrc}" alt="${c.name}" onload="this.previousSibling.style.display='none';this.classList.add('loaded')" onerror="this.previousSibling.style.display='none'">`
+    : `<span style="font-size:48px">${TYPE_E[c.t]||'🃏'}</span>`;
+
+  if (c.rh) {
+    w.innerHTML = `
+      <div class="mimg-viewer">
+        <div class="mimg-face${modalRhView?' is-rh':''}" id="mimg-face">${imgTag}</div>
+        <div class="mimg-toggle">
+          <button class="mimg-toggle-btn${!modalRhView?' active':''}" onclick="setModalFace(false)">✦ Normal</button>
+          <button class="mimg-toggle-btn${modalRhView?' active rh-active':''}" onclick="setModalFace(true)">🌟 Reverse Holo</button>
+        </div>
+      </div>`;
+  } else {
+    w.innerHTML = `<div class="mimg-viewer"><div class="mimg-face" id="mimg-face">${imgTag}</div></div>`;
+  }
+
+  document.getElementById('mtitle').textContent = c.name;
+  document.getElementById('mmeta').textContent = `#${c.n}/088  ·  ${c.t}  ·  ${R_LABEL[c.r]}`;
+  renderMOwned(c);
+  renderMPt(c);
+  const tid = TCG_IDS[c.n];
+  const slug = c.name.toLowerCase().replace(/[^a-z0-9]+/g,'-');
+  document.getElementById('mlink').href = tid
+    ? `https://www.tcgcollector.com/cards/${tid}/${slug}-perfect-order-${c.n}-088`
+    : `https://www.tcgcollector.com/sets/11685/perfect-order`;
+  document.getElementById('modal').classList.add('open');
+}
+
+function renderMPt(c) {
+  const p = tcgP[c.n];
+  const el = document.getElementById('mpt-tbl');
+  if (!p) { el.innerHTML = '<tr><td colspan="2" style="text-align:center;color:var(--t3);padding:10px">No price data</td></tr>'; return; }
+  el.innerHTML = `
+    <tr><td>Low</td><td>${p.low!=null?`€${p.low.toFixed(2)}`:'—'}</td></tr>
+    <tr><td>Market</td><td>${p.mid!=null?`€${p.mid.toFixed(2)}`:'—'}</td></tr>
+    <tr><td>High</td><td>${p.high!=null?`€${p.high.toFixed(2)}`:'—'}</td></tr>
+    ${p.rh!=null?`<tr class="rh-row"><td>🌟 RH Market</td><td>€${p.rh.toFixed(2)}</td></tr>`:''}
+  `;
+}
+
+function closeModal() { document.getElementById('modal').classList.remove('open'); cur = null; }
+document.addEventListener('keydown', e => { if (e.key==='Escape') closeModal(); });
+
+// ── CACHE LAYER ───────────────────────────────────────────────
+const CACHE_KEY = 'por4_tcg_v2';
+const CACHE_TTL = 6 * 60 * 60 * 1000;
+
+function loadCache() {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    const {ts, prices, images} = JSON.parse(raw);
+    if (Date.now() - ts > CACHE_TTL) return null;
+    return {prices, images, ts};
+  } catch(e) { return null; }
+}
+function saveCache() {
+  try { localStorage.setItem(CACHE_KEY, JSON.stringify({ts:Date.now(), prices:tcgP, images:tcgImg})); } catch(e) {}
+}
+
+// ── PRICE FETCH (background, non-blocking) ───────────────────
+let fetchDone = false;
+
+async function loadPrices() {
+  // Apply cache first (on top of baseline)
+  const cached = loadCache();
+  if (cached) {
+    Object.assign(tcgP, cached.prices);
+    Object.assign(tcgImg, cached.images);
+    render();
+    const ageMin = Math.round((Date.now() - cached.ts) / 60000);
+    const el = document.getElementById('pfresh');
+    el.textContent = `Prices cached · ${ageMin}m ago`;
+    el.classList.add('live');
+    // Skip network if under 30 min old
+    if (Date.now() - cached.ts < 30 * 60 * 1000) { fetchDone = true; return; }
+  }
+  if (fetchDone) return;
+  fetchDone = true;
+  const el = document.getElementById('pfresh');
+  el.textContent = 'Fetching live prices…';
+  try {
+    // Use set ID sv9pt5 (Perfect Order EN set code) for faster targeted lookup
+    const r = await fetch('https://api.pokemontcg.io/v2/cards?q=set.id:me3&pageSize=250&orderBy=number&select=number,images,tcgplayer');
+    if (!r.ok) throw new Error(r.status);
+    const d = await r.json();
+    if (d.data?.length) {
+      d.data.forEach(card => {
+        const num = String(parseInt(card.number)).padStart(3,'0');
+        if (card.images?.large) tcgImg[num] = card.images.large;
+        else if (card.images?.small) tcgImg[num] = card.images.small;
+        const p = card.tcgplayer?.prices;
+        if (p) {
+          const norm = p.normal||p.holofoil||p.unlimitedHolofoil||{};
+          const rh = p.reverseHolofoil||{};
+          tcgP[num] = {low:norm.low??null, mid:norm.market??null, high:norm.high??null, rh:rh.market??null};
+        }
+      });
+      saveCache();
+      render();
+      el.textContent = '✓ Live prices';
+      el.classList.add('live');
+      showToast('✓ Live prices updated');
+    } else {
+      el.textContent = cached ? 'Using cached prices' : 'Using baseline prices';
+    }
+  } catch(e) {
+    el.textContent = cached ? `Cached · offline` : 'Baseline prices';
+    fetchDone = false;
+  }
+}
+
+// ── TOAST ─────────────────────────────────────────────────────
+function showToast(msg, dur=2500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), dur);
+}
+
+// ── PRICES TAB ────────────────────────────────────────────────
+const PRODS = [
+  {n:'Booster Pack',lo:3.99,mid:5.25,hi:7.99,t:'+4.2%',up:true},
+  {n:'Elite Trainer Box',lo:44.99,mid:59.99,hi:89.99,t:'+11.5%',up:true},
+  {n:'Pokémon Center ETB',lo:59.99,mid:79.99,hi:119.99,t:'+18.3%',up:true},
+  {n:'Booster Bundle (6 packs)',lo:22.99,mid:28.99,hi:42.99,t:'+7.3%',up:true},
+  {n:'3-Pack Blister + Promo',lo:14.99,mid:18.99,hi:26.99,t:'+2.1%',up:true},
+  {n:'Build & Battle Box',lo:19.99,mid:24.99,hi:36.99,t:'+5.8%',up:true},
+  {n:'Booster Display Box (36)',lo:159.99,mid:189.99,hi:249.99,t:'+14.8%',up:true},
+];
+const CHASE = [
+  {n:'Mega Zygarde ex — MHR #124',lo:64.99,mid:89.99,hi:139.99,t:'+38%',up:true},
+  {n:'Mega Zygarde ex — SIR #120',lo:44.99,mid:64.99,hi:99.99,t:'+31%',up:true},
+  {n:"Rosa's Encouragement — SIR #123",lo:18.99,mid:27.99,hi:44.99,t:'+18%',up:true},
+  {n:'Mega Clefable ex — SIR #119',lo:14.99,mid:21.99,hi:34.99,t:'+9%',up:true},
+  {n:'Meowth ex — SIR #121',lo:12.99,mid:18.99,hi:29.99,t:'+15%',up:true},
+  {n:'Mega Zygarde ex — UR #104',lo:9.99,mid:14.99,hi:24.99,t:'+22%',up:true},
+  {n:'Yveltal ex — UR #105',lo:7.99,mid:12.99,hi:19.99,t:'+6%',up:true},
+  {n:'Rowlet — IR #090',lo:4.99,mid:7.99,hi:12.99,t:'+3%',up:true},
+  {n:'Spewpa — IR #089',lo:5.99,mid:8.99,hi:14.99,t:'+12%',up:true},
+  {n:'Tarragon — UR #116',lo:7.99,mid:11.99,hi:19.99,t:'+14%',up:true},
+];
+function renderPrices() {
+  const now = new Date();
+  document.getElementById('ptime').textContent = `${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;
+  document.getElementById('prodrows').innerHTML = PRODS.map(p=>`<div class="prow"><span class="pname">${p.n}</span><div class="pvals"><span class="prange">€${p.lo.toFixed(2)}–€${p.hi.toFixed(2)}</span><span class="pmid">€${p.mid.toFixed(2)}</span><span class="trend ${p.up?'tup':'tdn'}">${p.t}</span></div></div>`).join('');
+  document.getElementById('cardrows').innerHTML = CHASE.map(c=>`<div class="prow"><span class="pname">${c.n}</span><div class="pvals"><span class="prange">€${c.lo.toFixed(2)}–€${c.hi.toFixed(2)}</span><span class="pmid">€${c.mid.toFixed(2)}</span><span class="trend ${c.up?'tup':'tdn'}">${c.t}</span></div></div>`).join('');
+}
+
+// ── CONTROLS ──────────────────────────────────────────────────
+function setF(v,btn){oF=v;['fa','fo','fm'].forEach(id=>document.getElementById(id).classList.remove('on'));btn.classList.add('on');render();}
+function setV(v,btn){vM=v;document.querySelectorAll('.vb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');render();}
+function switchTab(t,el){
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('on'));el.classList.add('on');
+  document.getElementById('tab-cards').style.display=t==='cards'?'':'none';
+  document.getElementById('tab-prices').style.display=t==='prices'?'':'none';
+  if(t==='prices')renderPrices();
+}
+
+// ── PWA SETUP ─────────────────────────────────────────────────
+let deferredInstallPrompt = null;
+
+(function(){
+  // ── App icon SVG ──────────────────────────────────────────
+  // A hexagonal binder icon in the app's green-on-dark palette
+  const iconSVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+    <!-- Dark background rounded square -->
+    <rect width="512" height="512" rx="96" fill="#0c140c"/>
+    <!-- Hex shape (flat-top) -->
+    <polygon points="256,72 384,144 384,288 256,360 128,288 128,144"
+             fill="none" stroke="#3ddc32" stroke-width="24" stroke-linejoin="round"/>
+    <!-- Inner accent hex -->
+    <polygon points="256,116 352,168 352,272 256,324 160,272 160,168"
+             fill="rgba(61,220,50,0.08)" stroke="#1a6612" stroke-width="10" stroke-linejoin="round"/>
+    <!-- PO lettering -->
+    <text x="256" y="278" font-family="'Arial Black',sans-serif" font-weight="900"
+          font-size="112" text-anchor="middle" fill="#3ddc32"
+          style="filter:drop-shadow(0 0 16px rgba(61,220,50,0.7))">PO</text>
+    <!-- Bottom label -->
+    <text x="256" y="430" font-family="Arial,sans-serif" font-weight="700"
+          font-size="44" text-anchor="middle" fill="#4a6a44" letter-spacing="8">BINDER</text>
+  </svg>`;
+
+  const svgBlob = new Blob([iconSVG], {type:'image/svg+xml'});
+  const svgUrl = URL.createObjectURL(svgBlob);
+  document.getElementById('favicon-svg').href = svgUrl;
+
+  // Apple touch icon — render SVG to canvas → PNG
+  const img = new Image();
+  img.onload = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = 180;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, 180, 180);
+    document.getElementById('apple-icon').href = canvas.toDataURL('image/png');
+  };
+  img.src = svgUrl;
+
+  // ── PWA Manifest ──────────────────────────────────────────
+  // Encode the SVG as data URI for manifest icons (blob URLs not allowed in manifests)
+  const svgEncoded = 'data:image/svg+xml,' + encodeURIComponent(iconSVG);
+  const manifest = {
+    name: 'Perfect Order Binder',
+    short_name: 'PO Binder',
+    description: 'Pokémon ME03 Perfect Order Masterset Tracker',
+    start_url: '.',
+    display: 'standalone',
+    background_color: '#070d07',
+    theme_color: '#0c140c',
+    orientation: 'portrait-primary',
+    categories: ['games', 'utilities'],
+    icons: [
+      { src: svgEncoded, sizes: '192x192', type: 'image/svg+xml', purpose: 'any maskable' },
+      { src: svgEncoded, sizes: '512x512', type: 'image/svg+xml', purpose: 'any maskable' },
+    ]
+  };
+  const mBlob = new Blob([JSON.stringify(manifest)], {type:'application/json'});
+  document.getElementById('pwa-manifest').href = URL.createObjectURL(mBlob);
+})();
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstallPrompt=e;document.getElementById('install-btn').classList.add('visible');});
+window.addEventListener('appinstalled',()=>{document.getElementById('install-btn').classList.remove('visible');showToast('✓ App installed!',3000);});
+function installPWA(){if(deferredInstallPrompt){deferredInstallPrompt.prompt();deferredInstallPrompt.userChoice.then(()=>{deferredInstallPrompt=null;document.getElementById('install-btn').classList.remove('visible');});}else{showToast('Use "Add to Home Screen" in your browser menu',4000);}}
+window.addEventListener('online',()=>{document.getElementById('offline-bar').classList.remove('show');loadPrices();});
+window.addEventListener('offline',()=>{document.getElementById('offline-bar').classList.add('show');});
+
+// ── INIT ──────────────────────────────────────────────────────
+render();             // instant — uses BASE_PRICES
+loadPrices();         // async background fetch
+</script>
+</body>
+</html>
